@@ -8,7 +8,6 @@ repository = "https://github.com/clbarnes/template_cke"
 license = "MIT"
 edition = "2024"
 keywords = ["zarr", "chunk_key_encoding", "template"]
-categories = ["data-structures", "parsing", "serialization", "text-processing"]
 
 [dependencies]
 inventory = { version = "0.3.24", optional = true }

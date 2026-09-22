@@ -1,9 +1,5 @@
-[build-system]
-requires = ["maturin>=1.14,<2.0"]
-build-backend = "maturin"
-
 [project]
-name = "template_cke_py"
+name = "template_cke"
 requires-python = ">=3.12"
 classifiers = [
     "Programming Language :: Rust",
@@ -11,8 +7,16 @@ classifiers = [
     "Programming Language :: Python :: Implementation :: PyPy",
 ]
 dynamic = ["version"]
+authors = [{name = "Chris Barnes", email = "chrislloydbarnes@gmail.com"}]
+description = "Template chunk key encoding for Zarr"
+license = "MIT"
+keywords = ["zarr", "chunk_key_encoding", "template"]
+urls = {repository = "https://github.com/clbarnes/template_cke"}
 
 dependencies = ["zarr>=3.2.1"]
+
+[project.entry-points."zarr.chunk_key_encoding"]
+template = "template_cke_py:TemplateChunkKeyEncoding"
 
 [dependency-groups]
 dev = [
@@ -23,7 +27,11 @@ dev = [
     "ruff>=0.15.22",
 ]
 
+[build-system]
+requires = ["maturin>=1.14,<2.0"]
+build-backend = "maturin"
+
 [tool.maturin]
 python-source = "python"
 exclude = ["**/__pycache__", "**/*.pyc", "**/*.pyo"]
-module-name = "template_cke_py._template_cke_py"
+module-name = "template_cke._template_cke_py"

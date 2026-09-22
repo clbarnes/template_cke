@@ -1,4 +1,4 @@
-from template_cke_py import TemplateChunkKeyEncoding
+from template_cke import TemplateChunkKeyEncoding
 from .common import FORMAT, SEPARATOR
 
 

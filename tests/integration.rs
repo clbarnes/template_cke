@@ -1,6 +1,6 @@
-use template_cke::Interpolator;
 use std::str::FromStr;
 use std::sync::LazyLock;
+use template_cke::Interpolator;
 
 pub const TSV_TEXT: &str = include_str!("../fixtures/examples.tsv");
 

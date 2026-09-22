@@ -169,18 +169,21 @@ impl Interpolator {
             match part {
                 Part::String(s) => out.push_str(s),
                 Part::Index { idx, pad } => {
-                    let arg = chunk_idx.get(*idx).ok_or(
-                        InterpolateError::IndexOutOfBounds(*idx as isize, chunk_idx.len()),
-                    )?;
+                    let arg = chunk_idx
+                        .get(*idx)
+                        .ok_or(InterpolateError::IndexOutOfBounds(
+                            *idx as isize,
+                            chunk_idx.len(),
+                        ))?;
                     write!(out, "{arg:0pad$}", pad = pad)?;
                 }
                 Part::NegIndex { idx, pad } => {
                     let pos_idx = chunk_idx.len() as isize + idx;
 
                     if pos_idx >= 0 {
-                        let arg = chunk_idx.get(pos_idx as usize).ok_or(
-                            InterpolateError::IndexOutOfBounds(*idx, chunk_idx.len()),
-                        )?;
+                        let arg = chunk_idx
+                            .get(pos_idx as usize)
+                            .ok_or(InterpolateError::IndexOutOfBounds(*idx, chunk_idx.len()))?;
                         write!(out, "{arg:0pad$}", pad = pad)?;
                     } else {
                         return Err(InterpolateError::IndexOutOfBounds(*idx, chunk_idx.len()));

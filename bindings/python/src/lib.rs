@@ -1,5 +1,5 @@
-use template_cke::Interpolator;
 use pyo3::prelude::*;
+use template_cke::Interpolator;
 
 #[pyclass(frozen)]
 pub struct PyInterpolator(Interpolator);
@@ -17,7 +17,7 @@ impl PyInterpolator {
     pub fn encode(&self, chunk_idx: Vec<u64>) -> PyResult<String> {
         self.0
             .interpolate(&chunk_idx)
-            .map_err(|e| { PyErr::new::<pyo3::exceptions::PyValueError, _>(e.to_string())})
+            .map_err(|e| PyErr::new::<pyo3::exceptions::PyValueError, _>(e.to_string()))
     }
 }
 

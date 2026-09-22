@@ -2,11 +2,11 @@ from .common import FORMAT, SEPARATOR
 
 
 def test_import():
-    from template_cke_py import TemplateChunkKeyEncoding  # noqa
+    from template_cke import TemplateChunkKeyEncoding  # noqa
 
 
 def test_sum_as_string():
-    from template_cke_py import TemplateChunkKeyEncoding
+    from template_cke import TemplateChunkKeyEncoding
 
     cke = TemplateChunkKeyEncoding(FORMAT, SEPARATOR)
     encoded = cke.encode_chunk_key((0, 1, 2, 3, 4, 5, 6))
@@ -14,7 +14,7 @@ def test_sum_as_string():
 
 
 def test_from_dict():
-    from template_cke_py import TemplateChunkKeyEncoding
+    from template_cke import TemplateChunkKeyEncoding
 
     cke = TemplateChunkKeyEncoding.from_dict(
         {
@@ -31,7 +31,7 @@ def test_from_dict():
 
 
 def test_to_dict():
-    from template_cke_py import TemplateChunkKeyEncoding
+    from template_cke import TemplateChunkKeyEncoding
 
     cke = TemplateChunkKeyEncoding(FORMAT, SEPARATOR)
     d = cke.to_dict()

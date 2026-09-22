@@ -12,8 +12,9 @@ __all__ = ["TemplateChunkKeyEncoding"]
 
 @dataclass(frozen=True)
 class TemplateChunkKeyEncoding(ChunkKeyEncoding):
-    format: str
     name: ClassVar[Literal["template"]] = "template"
+
+    format: str
     separator: str | None = None
     _interpolator: PyInterpolator = field(init=False)
 

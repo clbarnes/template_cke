@@ -1,1 +1,1 @@
-# Generic chunk key encoding for zarr-python
+# Template chunk key encoding for zarr-python

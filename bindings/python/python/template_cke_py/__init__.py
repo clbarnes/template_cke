@@ -5,15 +5,15 @@ from zarr.core.chunk_key_encodings import ChunkKeyEncoding
 from zarr.core.common import JSON, parse_named_configuration
 from zarr.registry import register_chunk_key_encoding
 
-from ._generic_cke_py import PyInterpolator
+from ._template_cke_py import PyInterpolator
 
-__all__ = ["GenericChunkKeyEncoding"]
+__all__ = ["TemplateChunkKeyEncoding"]
 
 
 @dataclass(frozen=True)
-class GenericChunkKeyEncoding(ChunkKeyEncoding):
+class TemplateChunkKeyEncoding(ChunkKeyEncoding):
     format: str
-    name: ClassVar[Literal["generic"]] = "generic"
+    name: ClassVar[Literal["template"]] = "template"
     separator: str | None = None
     _interpolator: PyInterpolator = field(init=False)
 
@@ -44,4 +44,4 @@ class GenericChunkKeyEncoding(ChunkKeyEncoding):
         return self._interpolator.encode(chunk_coords)
 
 
-register_chunk_key_encoding(GenericChunkKeyEncoding.name, GenericChunkKeyEncoding)
+register_chunk_key_encoding(TemplateChunkKeyEncoding.name, TemplateChunkKeyEncoding)

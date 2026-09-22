@@ -1,12 +1,12 @@
-from generic_cke_py import GenericChunkKeyEncoding
+from template_cke_py import TemplateChunkKeyEncoding
 from .common import FORMAT, SEPARATOR
 
 
 def test_bench_instantiation(benchmark):
-    benchmark(GenericChunkKeyEncoding, FORMAT, SEPARATOR)
+    benchmark(TemplateChunkKeyEncoding, FORMAT, SEPARATOR)
 
 
 def test_bench_encode(benchmark):
-    cke = GenericChunkKeyEncoding(FORMAT, SEPARATOR)
+    cke = TemplateChunkKeyEncoding(FORMAT, SEPARATOR)
     chunk_idx = (0, 1, 2, 3, 4, 5, 6)
     benchmark(cke.encode_chunk_key, chunk_idx)

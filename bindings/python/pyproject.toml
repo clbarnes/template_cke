@@ -3,7 +3,7 @@ requires = ["maturin>=1.14,<2.0"]
 build-backend = "maturin"
 
 [project]
-name = "generic_cke_py"
+name = "template_cke_py"
 requires-python = ">=3.12"
 classifiers = [
     "Programming Language :: Rust",
@@ -26,4 +26,4 @@ dev = [
 [tool.maturin]
 python-source = "python"
 exclude = ["**/__pycache__", "**/*.pyc", "**/*.pyo"]
-module-name = "generic_cke_py._generic_cke_py"
+module-name = "template_cke_py._template_cke_py"

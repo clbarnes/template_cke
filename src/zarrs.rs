@@ -4,29 +4,29 @@ use zarrs_metadata::{Configuration, ConfigurationSerialize};
 use zarrs_plugin::{PluginConfigurationInvalidError, PluginCreateError};
 use zarrs_storage::StoreKey;
 
-zarrs_plugin::impl_extension_aliases!(GenericChunkKeyEncoding, v3: "generic", ["zarrs:generic"]);
+zarrs_plugin::impl_extension_aliases!(TemplateChunkKeyEncoding, v3: "template", ["zarrs:template"]);
 
 // Register the chunk key encoding.
 inventory::submit! {
-    ChunkKeyEncodingPlugin::new::<GenericChunkKeyEncoding>()
+    ChunkKeyEncodingPlugin::new::<TemplateChunkKeyEncoding>()
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
 #[serde(deny_unknown_fields)]
-pub struct GenericChunkKeyEncodingConfiguration {
+pub struct TemplateChunkKeyEncodingConfiguration {
     format: String,
     separator: Option<String>,
 }
 
-impl ConfigurationSerialize for GenericChunkKeyEncodingConfiguration {}
+impl ConfigurationSerialize for TemplateChunkKeyEncodingConfiguration {}
 
 #[derive(Debug, Clone)]
-pub struct GenericChunkKeyEncoding {
+pub struct TemplateChunkKeyEncoding {
     format: String,
     interpolator: crate::Interpolator,
 }
 
-impl GenericChunkKeyEncoding {
+impl TemplateChunkKeyEncoding {
     pub fn try_new(
         format: impl Into<String>,
         separator: Option<impl Into<String>>,
@@ -40,16 +40,16 @@ impl GenericChunkKeyEncoding {
     }
 }
 
-impl TryFrom<GenericChunkKeyEncodingConfiguration> for GenericChunkKeyEncoding {
+impl TryFrom<TemplateChunkKeyEncodingConfiguration> for TemplateChunkKeyEncoding {
     type Error = String;
 
-    fn try_from(config: GenericChunkKeyEncodingConfiguration) -> Result<Self, Self::Error> {
+    fn try_from(config: TemplateChunkKeyEncodingConfiguration) -> Result<Self, Self::Error> {
         Self::try_new(config.format, config.separator)
     }
 }
 
-impl From<GenericChunkKeyEncoding> for GenericChunkKeyEncodingConfiguration {
-    fn from(value: GenericChunkKeyEncoding) -> Self {
+impl From<TemplateChunkKeyEncoding> for TemplateChunkKeyEncodingConfiguration {
+    fn from(value: TemplateChunkKeyEncoding) -> Self {
         let separator = value
             .interpolator
             .has_catchall()
@@ -61,8 +61,8 @@ impl From<GenericChunkKeyEncoding> for GenericChunkKeyEncodingConfiguration {
     }
 }
 
-impl From<&GenericChunkKeyEncoding> for GenericChunkKeyEncodingConfiguration {
-    fn from(value: &GenericChunkKeyEncoding) -> Self {
+impl From<&TemplateChunkKeyEncoding> for TemplateChunkKeyEncodingConfiguration {
+    fn from(value: &TemplateChunkKeyEncoding) -> Self {
         let separator = value
             .interpolator
             .has_catchall()
@@ -75,21 +75,21 @@ impl From<&GenericChunkKeyEncoding> for GenericChunkKeyEncodingConfiguration {
     }
 }
 
-impl ChunkKeyEncodingTraits for GenericChunkKeyEncoding {
+impl ChunkKeyEncodingTraits for TemplateChunkKeyEncoding {
     fn create(metadata: &MetadataV3) -> Result<ChunkKeyEncoding, PluginCreateError>
     where
         Self: Sized,
     {
-        let configuration: GenericChunkKeyEncodingConfiguration =
+        let configuration: TemplateChunkKeyEncodingConfiguration =
             metadata.to_typed_configuration()?;
-        let generic = GenericChunkKeyEncoding::try_from(configuration).map_err(|e| {
+        let template = TemplateChunkKeyEncoding::try_from(configuration).map_err(|e| {
             PluginCreateError::ConfigurationInvalid(PluginConfigurationInvalidError::new(e))
         })?;
-        Ok(generic.into())
+        Ok(template.into())
     }
 
     fn configuration(&self) -> Configuration {
-        GenericChunkKeyEncodingConfiguration::from(self).into()
+        TemplateChunkKeyEncodingConfiguration::from(self).into()
     }
 
     fn encode(&self, chunk_grid_indices: &[u64]) -> StoreKey {
@@ -112,25 +112,25 @@ mod tests {
     #[test]
     fn can_deser() {
         let json = serde_json::json!({
-            "name": "generic",
+            "name": "template",
             "configuration": {
                 "format": FORMAT,
                 "separator": ":"
             }
         });
         let meta = MetadataV3::deserialize(json).expect("failed to deserialize metadata");
-        let config: GenericChunkKeyEncodingConfiguration = meta
+        let config: TemplateChunkKeyEncodingConfiguration = meta
             .to_typed_configuration()
             .expect("failed to deserialize typed configuration");
         let _encoding =
-            GenericChunkKeyEncoding::try_from(config).expect("failed to create encoder");
+            TemplateChunkKeyEncoding::try_from(config).expect("failed to create encoder");
     }
 
     #[test]
     fn can_ser() {
         let encoding =
-            GenericChunkKeyEncoding::try_new(FORMAT, Some(":")).expect("failed to create encoder");
-        let config: GenericChunkKeyEncodingConfiguration = (&encoding).into();
+            TemplateChunkKeyEncoding::try_new(FORMAT, Some(":")).expect("failed to create encoder");
+        let config: TemplateChunkKeyEncodingConfiguration = (&encoding).into();
         let meta = MetadataV3::new_with_serializable_configuration(
             encoding
                 .name(zarrs_plugin::ZarrVersion::V3)
@@ -142,7 +142,7 @@ mod tests {
         let json = serde_json::to_value(&meta).expect("failed to serialize metadata");
         let expected_json = serde_json::json!(
             {
-                "name": "generic",
+                "name": "template",
                 "configuration": {
                     "format": FORMAT,
                     "separator": ":"

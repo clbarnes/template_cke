@@ -1,4 +1,4 @@
-use generic_cke::Interpolator;
+use template_cke::Interpolator;
 use pyo3::prelude::*;
 
 #[pyclass(frozen)]
@@ -23,7 +23,7 @@ impl PyInterpolator {
 
 /// A Python module implemented in Rust.
 #[pymodule]
-mod _generic_cke_py {
+mod _template_cke_py {
     #[pymodule_export]
     use super::PyInterpolator;
 }

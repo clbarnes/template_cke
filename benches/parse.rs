@@ -1,6 +1,6 @@
 use criterion::{Criterion, criterion_group, criterion_main};
-use generic_cke::parser::parse_parts;
 use std::hint::black_box;
+use template_cke::parser::parse_parts;
 
 const FORMAT: &str = "potato{0}-{2}/${4:03}_{*},{-1}suffix";
 

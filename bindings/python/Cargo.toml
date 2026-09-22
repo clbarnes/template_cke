@@ -1,13 +1,13 @@
 [package]
-name = "generic_cke_py"
+name = "template_cke_py"
 version = "0.1.0"
 edition = "2024"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 [lib]
-name = "generic_cke_py"
+name = "template_cke_py"
 crate-type = ["cdylib"]
 
 [dependencies]
-generic_cke = { version = "0.1.0", path = "../..", default-features = false }
+template_cke = { version = "0.1.0", path = "../..", default-features = false }
 pyo3 = { version = "0.29.0", features = ["abi3-py312"] }

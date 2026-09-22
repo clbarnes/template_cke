@@ -296,28 +296,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "generic_cke"
-version = "0.1.0"
-dependencies = [
- "criterion",
- "inventory",
- "serde",
- "serde_json",
- "zarrs_chunk_key_encoding",
- "zarrs_metadata",
- "zarrs_plugin",
- "zarrs_storage",
-]
-
-[[package]]
-name = "generic_cke_py"
-version = "0.1.0"
-dependencies = [
- "generic_cke",
- "pyo3",
-]
-
-[[package]]
 name = "half"
 version = "2.7.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -743,6 +721,28 @@ name = "target-lexicon"
 version = "0.13.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "adb6935a6f5c20170eeceb1a3835a49e12e19d792f6dd344ccc76a985ca5a6ca"
+
+[[package]]
+name = "template_cke"
+version = "0.1.0"
+dependencies = [
+ "criterion",
+ "inventory",
+ "serde",
+ "serde_json",
+ "zarrs_chunk_key_encoding",
+ "zarrs_metadata",
+ "zarrs_plugin",
+ "zarrs_storage",
+]
+
+[[package]]
+name = "template_cke_py"
+version = "0.1.0"
+dependencies = [
+ "pyo3",
+ "template_cke",
+]
 
 [[package]]
 name = "thiserror"

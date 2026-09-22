@@ -1,4 +1,4 @@
-use generic_cke::Interpolator;
+use template_cke::Interpolator;
 use std::str::FromStr;
 use std::sync::LazyLock;
 

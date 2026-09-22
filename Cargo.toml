@@ -1,7 +1,13 @@
 [package]
 name = "template_cke"
 version = "0.1.0"
+authors = ["Chris Barnes <chrislloydbarnes@gmail.com>"]
+rust-version = "1.85"
+repository = "https://github.com/clbarnes/template_cke"
+license = "MIT"
 edition = "2024"
+keywords = ["zarr", "chunk_key_encoding", "template"]
+categories = ["data-structures", "parsing", "serialization", "text-processing"]
 
 [dependencies]
 inventory = { version = "0.3.24", optional = true }

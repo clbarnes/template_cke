@@ -9,7 +9,7 @@ impl PyInterpolator {
     #[new]
     pub fn new(format: &str, separator: Option<&str>) -> PyResult<Self> {
         let interpolator = Interpolator::try_new(format, separator)
-            .map_err(PyErr::new::<pyo3::exceptions::PyValueError, _>)?;
+            .map_err(|e| PyErr::new::<pyo3::exceptions::PyValueError, _>(e.to_string()))?;
         Ok(Self(interpolator))
     }
 
@@ -17,7 +17,7 @@ impl PyInterpolator {
     pub fn encode(&self, chunk_idx: Vec<u64>) -> PyResult<String> {
         self.0
             .interpolate(&chunk_idx)
-            .map_err(PyErr::new::<pyo3::exceptions::PyValueError, _>)
+            .map_err(|e| { PyErr::new::<pyo3::exceptions::PyValueError, _>(e.to_string())})
     }
 }
 

@@ -15,12 +15,14 @@ pub struct TestCase {
 
 impl TestCase {
     pub fn interpolator(&self) -> Result<Interpolator, String> {
-        Interpolator::try_new(&self.template, Some(&self.separator))
+        Interpolator::try_new(&self.template, Some(&self.separator)).map_err(|e| e.to_string())
     }
 
     pub fn run(&self) -> Result<(), String> {
         let interpolator = self.interpolator()?;
-        let encoded = interpolator.interpolate(&self.chunk_coordinates)?;
+        let encoded = interpolator
+            .interpolate(&self.chunk_coordinates)
+            .map_err(|e| e.to_string())?;
         assert_eq!(
             encoded, self.encoded,
             "Encoding mismatch for template='{}', separator='{}':\n  expected: '{}'\n       got: '{}'",

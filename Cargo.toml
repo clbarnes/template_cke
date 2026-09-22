@@ -6,6 +6,7 @@ edition = "2024"
 [dependencies]
 inventory = { version = "0.3.24", optional = true }
 serde = { version = "1.0.229", features = ["derive"], optional = true }
+thiserror = "2.0.12"
 zarrs_chunk_key_encoding = { version = "0.2.0", optional = true }
 zarrs_metadata = { version = "0.7.5", optional = true }
 zarrs_plugin = { version = "0.4.1", optional = true }

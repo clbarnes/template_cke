@@ -730,6 +730,7 @@ dependencies = [
  "inventory",
  "serde",
  "serde_json",
+ "thiserror",
  "zarrs_chunk_key_encoding",
  "zarrs_metadata",
  "zarrs_plugin",

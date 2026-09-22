@@ -4,6 +4,8 @@ use zarrs_metadata::{Configuration, ConfigurationSerialize};
 use zarrs_plugin::{PluginConfigurationInvalidError, PluginCreateError};
 use zarrs_storage::StoreKey;
 
+use crate::errors::ParseError;
+
 zarrs_plugin::impl_extension_aliases!(TemplateChunkKeyEncoding, v3: "template", ["zarrs:template"]);
 
 // Register the chunk key encoding.
@@ -30,7 +32,7 @@ impl TemplateChunkKeyEncoding {
     pub fn try_new(
         format: impl Into<String>,
         separator: Option<impl Into<String>>,
-    ) -> Result<Self, String> {
+    ) -> Result<Self, crate::errors::ParseError> {
         let format = format.into();
         let interpolator = crate::Interpolator::try_new(&format, separator.map(|s| s.into()))?;
         Ok(Self {
@@ -41,7 +43,7 @@ impl TemplateChunkKeyEncoding {
 }
 
 impl TryFrom<TemplateChunkKeyEncodingConfiguration> for TemplateChunkKeyEncoding {
-    type Error = String;
+    type Error = crate::errors::ParseError;
 
     fn try_from(config: TemplateChunkKeyEncodingConfiguration) -> Result<Self, Self::Error> {
         Self::try_new(config.format, config.separator)
@@ -82,9 +84,7 @@ impl ChunkKeyEncodingTraits for TemplateChunkKeyEncoding {
     {
         let configuration: TemplateChunkKeyEncodingConfiguration =
             metadata.to_typed_configuration()?;
-        let template = TemplateChunkKeyEncoding::try_from(configuration).map_err(|e| {
-            PluginCreateError::ConfigurationInvalid(PluginConfigurationInvalidError::new(e))
-        })?;
+        let template = TemplateChunkKeyEncoding::try_from(configuration)?;
         Ok(template.into())
     }
 
@@ -98,6 +98,14 @@ impl ChunkKeyEncodingTraits for TemplateChunkKeyEncoding {
             .interpolate(chunk_grid_indices)
             .expect("Failed to interpolate chunk key");
         StoreKey::new(key).expect("Interpolated string is not a valid chunk key")
+    }
+}
+
+impl From<ParseError> for PluginCreateError {
+    fn from(err: ParseError) -> Self {
+        PluginCreateError::ConfigurationInvalid(PluginConfigurationInvalidError::new(
+            err.to_string(),
+        ))
     }
 }
 

@@ -1,4 +1,5 @@
 use super::Part;
+use crate::errors::ParseError;
 use std::iter::Peekable;
 use std::str::Chars;
 
@@ -6,6 +7,7 @@ struct FormatParser<'a> {
     parts: Vec<Part>,
     in_brace: bool,
     buf: String,
+    format: &'a str,
     chars: Peekable<Chars<'a>>,
 }
 
@@ -15,11 +17,12 @@ impl<'a> FormatParser<'a> {
             parts: Vec::new(),
             in_brace: false,
             buf: String::with_capacity(format.len()),
+            format,
             chars: format.chars().peekable(),
         }
     }
 
-    fn take_part(&mut self) -> Result<Option<Part>, String> {
+    fn take_part(&mut self) -> Result<Option<Part>, ParseError> {
         self.buf.clear();
         while let Some(c) = self.chars.next() {
             if self.in_brace && c == '}' {
@@ -39,13 +42,13 @@ impl<'a> FormatParser<'a> {
                     self.chars.next();
                     continue;
                 }
-                return Err("Unmatched '}' in format string".into());
+                return Err(ParseError::UnmatchedBrace(self.format.to_string()));
             } else {
                 self.buf.push(c);
             }
         }
         if self.in_brace {
-            Err("Unmatched '{' in format string".into())
+            Err(ParseError::UnmatchedBrace(self.format.to_string()))
         } else if self.buf.is_empty() {
             Ok(None)
         } else {
@@ -60,7 +63,7 @@ impl<'a> FormatParser<'a> {
     }
 }
 
-pub fn parse_parts(format: &str) -> Result<Vec<Part>, String> {
+pub fn parse_parts(format: &str) -> Result<Vec<Part>, ParseError> {
     let mut parser = FormatParser::new(format);
     while let Some(part) = parser.take_part()? {
         parser.parts.push(part);

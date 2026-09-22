@@ -2,7 +2,9 @@ use std::collections::BTreeMap;
 use std::fmt::Write;
 use std::str::FromStr;
 
+use crate::errors::{InterpolateError, ParseError};
 use crate::parser::parse_parts;
+pub mod errors;
 pub mod parser;
 
 #[cfg(feature = "zarrs")]
@@ -40,21 +42,21 @@ impl From<isize> for Part {
     }
 }
 
-fn parse_pad(s: &str) -> Result<usize, String> {
+fn parse_number_format(s: &str) -> Result<usize, ParseError> {
     if !s.starts_with('0') {
-        return Err("Expected `0` after `:` for padding".into());
+        return Err(ParseError::InvalidNumberFormat(s.to_string()));
     }
     s[1..]
         .parse::<usize>()
-        .map_err(|_| format!("Invalid padding value: {s}"))
+        .map_err(|_| ParseError::InvalidNumberFormat(s.to_string()))
 }
 
 impl FromStr for Part {
-    type Err = String;
+    type Err = ParseError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         let (idx_str, pad) = if let Some((pre, post)) = s.split_once(':') {
-            (pre, parse_pad(post)?)
+            (pre, parse_number_format(post)?)
         } else {
             (s, 0)
         };
@@ -64,14 +66,14 @@ impl FromStr for Part {
             Ok(Part::NegIndex {
                 idx: idx_str
                     .parse::<isize>()
-                    .map_err(|_| format!("Invalid negative index: {}", idx_str))?,
+                    .map_err(|_| ParseError::InvalidIndex(idx_str.to_string()))?,
                 pad,
             })
         } else {
             Ok(Part::Index {
                 idx: idx_str
                     .parse::<usize>()
-                    .map_err(|_| format!("Invalid index: {}", idx_str))?,
+                    .map_err(|_| ParseError::InvalidIndex(idx_str.to_string()))?,
                 pad,
             })
         }
@@ -88,7 +90,7 @@ pub struct Interpolator {
 }
 
 impl Interpolator {
-    pub fn try_new(fmt: &str, sep: Option<impl Into<String>>) -> Result<Self, String> {
+    pub fn try_new(fmt: &str, sep: Option<impl Into<String>>) -> Result<Self, ParseError> {
         let parts = parse_parts(fmt)?;
         Self::from_parts(parts, sep)
     }
@@ -96,7 +98,7 @@ impl Interpolator {
     pub(crate) fn from_parts(
         parts: Vec<Part>,
         sep: Option<impl Into<String>>,
-    ) -> Result<Self, String> {
+    ) -> Result<Self, ParseError> {
         let mut pad_by_idx = BTreeMap::default();
         let mut has_catchall = false;
         let mut strs_len: usize = 0;
@@ -108,22 +110,22 @@ impl Interpolator {
                 Part::Index { idx, pad } => {
                     max_pad = max_pad.max(*pad);
                     if pad_by_idx.insert(*idx as isize, *pad).is_some() {
-                        return Err(format!("Index {idx} is already used"));
+                        return Err(ParseError::DuplicateIndex(*idx as isize));
                     }
                 }
                 Part::NegIndex { idx, pad } => {
                     max_pad = max_pad.max(*pad);
                     if pad_by_idx.insert(*idx, *pad).is_some() {
-                        return Err(format!("Index {idx} is already used"));
+                        return Err(ParseError::DuplicateIndex(*idx));
                     }
                 }
                 Part::CatchAll { pad } => {
                     if sep.is_none() {
-                        return Err("Catch-all part requires a separator".into());
+                        return Err(ParseError::CatchAllNeedsSeparator);
                     }
                     max_pad = max_pad.max(*pad);
                     if has_catchall {
-                        return Err("Cannot have multiple catch-all parts".into());
+                        return Err(ParseError::MultipleCatchAll);
                     }
                     has_catchall = true;
                 }
@@ -160,28 +162,28 @@ impl Interpolator {
             + (chunk_idx.len().saturating_sub(self.pad_by_idx.len() + 1)) * self.sep.len()
     }
 
-    pub fn interpolate(&self, chunk_idx: &[u64]) -> Result<String, String> {
+    pub fn interpolate(&self, chunk_idx: &[u64]) -> Result<String, InterpolateError> {
         let mut out = String::with_capacity(self.buf_len(chunk_idx));
 
         for part in &self.parts {
             match part {
                 Part::String(s) => out.push_str(s),
                 Part::Index { idx, pad } => {
-                    let arg = chunk_idx
-                        .get(*idx)
-                        .ok_or_else(|| format!("Index {idx} is out of bounds"))?;
-                    write!(out, "{arg:0pad$}", pad = pad).map_err(|e| e.to_string())?;
+                    let arg = chunk_idx.get(*idx).ok_or(
+                        InterpolateError::IndexOutOfBounds(*idx as isize, chunk_idx.len()),
+                    )?;
+                    write!(out, "{arg:0pad$}", pad = pad)?;
                 }
                 Part::NegIndex { idx, pad } => {
                     let pos_idx = chunk_idx.len() as isize + idx;
 
                     if pos_idx >= 0 {
-                        let arg = chunk_idx
-                            .get(pos_idx as usize)
-                            .ok_or_else(|| format!("Index {idx} is out of bounds"))?;
-                        write!(out, "{arg:0pad$}", pad = pad).map_err(|e| e.to_string())?;
+                        let arg = chunk_idx.get(pos_idx as usize).ok_or(
+                            InterpolateError::IndexOutOfBounds(*idx, chunk_idx.len()),
+                        )?;
+                        write!(out, "{arg:0pad$}", pad = pad)?;
                     } else {
-                        return Err(format!("Negative index {idx} is out of bounds"));
+                        return Err(InterpolateError::IndexOutOfBounds(*idx, chunk_idx.len()));
                     }
                 }
                 Part::CatchAll { pad } => {
@@ -198,7 +200,7 @@ impl Interpolator {
                         } else {
                             out.push_str(&self.sep);
                         }
-                        write!(out, "{arg:0pad$}", pad = pad).map_err(|e| e.to_string())?;
+                        write!(out, "{arg:0pad$}", pad = pad)?;
                     }
                 }
             }

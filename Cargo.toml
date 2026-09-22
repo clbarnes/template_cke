@@ -1,5 +1,6 @@
 [package]
 name = "template_cke"
+description = "Template chunk key encoding for Zarr"
 version = "0.1.0"
 authors = ["Chris Barnes <chrislloydbarnes@gmail.com>"]
 rust-version = "1.85"

@@ -150,8 +150,8 @@ impl Interpolator {
             .any(|p| matches!(p, Part::CatchAll { .. }))
     }
 
-    /// Suggest a length (in bytes) for the string buffer to allocate in [Self::interpolate].
-    fn buf_len(&self, chunk_idx: &[u64]) -> usize {
+    /// Estimate a length (in bytes) for the string buffer to allocate in [Self::interpolate].
+    pub fn buf_len(&self, chunk_idx: &[u64]) -> usize {
         let max_digits = chunk_idx
             .iter()
             .max()
@@ -162,9 +162,17 @@ impl Interpolator {
             + (chunk_idx.len().saturating_sub(self.pad_by_idx.len() + 1)) * self.sep.len()
     }
 
-    pub fn interpolate(&self, chunk_idx: &[u64]) -> Result<String, InterpolateError> {
-        let mut out = String::with_capacity(self.buf_len(chunk_idx));
-
+    /// Encode the given chunk index into the given buffer,
+    /// returning the slice of the buffer containing the chunk key.
+    ///
+    /// The buffer is appended to: callers should clear it manually between calls if desired.
+    pub fn interpolate_into<'a>(
+        &self,
+        chunk_idx: &[u64],
+        out: &'a mut String,
+    ) -> Result<&'a str, InterpolateError> {
+        let start = out.len();
+        out.reserve(self.buf_len(chunk_idx));
         for part in &self.parts {
             match part {
                 Part::String(s) => out.push_str(s),
@@ -209,6 +217,13 @@ impl Interpolator {
             }
         }
 
+        Ok(&out[start..])
+    }
+
+    /// Format the given chunk index into an owned string.
+    pub fn interpolate(&self, chunk_idx: &[u64]) -> Result<String, InterpolateError> {
+        let mut out = String::default();
+        self.interpolate_into(chunk_idx, &mut out)?;
         Ok(out)
     }
 }

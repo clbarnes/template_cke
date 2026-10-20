@@ -18,5 +18,23 @@ fn bench_interpolate(c: &mut Criterion) {
     });
 }
 
-criterion_group!(benches, bench_build, bench_interpolate);
+fn bench_interpolate_into(c: &mut Criterion) {
+    let interp = Interpolator::try_new(FORMAT, Some(":")).unwrap();
+    let mut out = String::with_capacity(interp.buf_len(CHUNK_IDX));
+    c.bench_function("interpolate_into", |b| {
+        b.iter(|| {
+            interp
+                .interpolate_into(black_box(CHUNK_IDX), &mut out)
+                .unwrap();
+            out.clear();
+        })
+    });
+}
+
+criterion_group!(
+    benches,
+    bench_build,
+    bench_interpolate,
+    bench_interpolate_into
+);
 criterion_main!(benches);

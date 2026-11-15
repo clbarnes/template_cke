@@ -728,6 +728,7 @@ version = "0.1.0"
 dependencies = [
  "criterion",
  "inventory",
+ "monostate",
  "serde",
  "serde_json",
  "thiserror",

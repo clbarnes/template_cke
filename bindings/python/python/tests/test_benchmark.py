@@ -1,5 +1,6 @@
 from template_cke import TemplateChunkKeyEncoding
-from .common import TEMPLATE, SEPARATOR
+
+from .common import SEPARATOR, TEMPLATE
 
 
 def test_bench_instantiation(benchmark):

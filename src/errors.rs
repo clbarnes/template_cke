@@ -1,7 +1,7 @@
 use thiserror::Error;
 
 /// Errors produced while parsing a template string and constructing an
-/// [`Interpolator`](crate::Interpolator).
+/// [`TemplateChunkKeyEncoding`](crate::TemplateChunkKeyEncoding).
 #[derive(Debug, Clone, PartialEq, Eq, Error)]
 pub enum ParseError {
     /// A brace was unmatched in the template string (an unescaped `{` or `}`).

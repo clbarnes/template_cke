@@ -4,7 +4,8 @@ use zarrs_metadata::{Configuration, ConfigurationSerialize};
 use zarrs_plugin::{PluginConfigurationInvalidError, PluginCreateError};
 use zarrs_storage::StoreKey;
 
-use crate::config::{TemplateChunkKeyEncoding, TemplateChunkKeyEncodingConfiguration};
+use crate::TemplateChunkKeyEncoding;
+use crate::config::TemplateChunkKeyEncodingConfiguration;
 use crate::errors::ParseError;
 
 zarrs_plugin::impl_extension_aliases!(TemplateChunkKeyEncoding, v3: "template", ["zarrs:template"]);
@@ -33,7 +34,6 @@ impl ChunkKeyEncodingTraits for TemplateChunkKeyEncoding {
 
     fn encode(&self, chunk_grid_indices: &[u64]) -> StoreKey {
         let key = self
-            .interpolator
             .interpolate(chunk_grid_indices)
             .expect("Failed to interpolate chunk key");
         StoreKey::new(key).expect("Interpolated string is not a valid chunk key")

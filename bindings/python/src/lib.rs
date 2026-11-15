@@ -1,14 +1,14 @@
 use pyo3::prelude::*;
-use template_cke::Interpolator;
+use template_cke::TemplateChunkKeyEncoding;
 
 #[pyclass(frozen)]
-pub struct PyInterpolator(Interpolator);
+pub struct PyInterpolator(TemplateChunkKeyEncoding);
 
 #[pymethods]
 impl PyInterpolator {
     #[new]
     pub fn new(template: &str, separator: Option<&str>) -> PyResult<Self> {
-        let interpolator = Interpolator::try_new(template, separator)
+        let interpolator = TemplateChunkKeyEncoding::try_new(template, separator)
             .map_err(|e| PyErr::new::<pyo3::exceptions::PyValueError, _>(e.to_string()))?;
         Ok(Self(interpolator))
     }

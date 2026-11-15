@@ -1,5 +1,5 @@
 use std::collections::BTreeMap;
-use std::fmt::Write;
+use std::fmt::{Display, Write};
 use std::str::FromStr;
 
 use crate::errors::{InterpolateError, ParseError};
@@ -81,8 +81,47 @@ impl FromStr for Part {
     }
 }
 
+#[derive(Debug, Clone, Copy)]
+pub struct DisplayTemplate<'a>(&'a TemplateChunkKeyEncoding);
+
+impl Display for DisplayTemplate<'_> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        for part in &self.0.parts {
+            match part {
+                Part::String(s) => f.write_str(s)?,
+                Part::Index { idx, pad } => {
+                    if *pad > 0 {
+                        write!(f, "{{{idx}:0{pad}}}")?;
+                    } else {
+                        write!(f, "{{{idx}}}")?;
+                    }
+                }
+                Part::NegIndex { idx, pad } => {
+                    if *pad > 0 {
+                        write!(f, "{{{idx}:0{pad}}}")?;
+                    } else {
+                        write!(f, "{{{idx}}}")?;
+                    }
+                }
+                Part::CatchAll { pad } => {
+                    if *pad > 0 {
+                        write!(f, "{{*:0{pad}}}")?;
+                    } else {
+                        f.write_str("{*}")?;
+                    }
+                }
+            }
+        }
+        Ok(())
+    }
+}
+
+/// Chunk key encoding which interpolates chunk indices into a template string.
+///
+/// Can be converted to and from Zarr v3 metadata via [config::TemplateChunkKeyEncodingConfiguration]
+/// and [config::TemplateChunkKeyEncodingMetadata].
 #[derive(Debug, Clone)]
-pub struct Interpolator {
+pub struct TemplateChunkKeyEncoding {
     parts: Vec<Part>,
     pad_by_idx: BTreeMap<isize, usize>,
     sep: String,
@@ -90,10 +129,15 @@ pub struct Interpolator {
     max_pad: usize,
 }
 
-impl Interpolator {
+impl TemplateChunkKeyEncoding {
     pub fn try_new(template: &str, sep: Option<impl Into<String>>) -> Result<Self, ParseError> {
         let parts = parse_parts(template)?;
         Self::from_parts(parts, sep)
+    }
+
+    /// Return a wrapper which implements [Display], writing the template string.
+    pub fn display(&self) -> DisplayTemplate<'_> {
+        DisplayTemplate(self)
     }
 
     pub(crate) fn from_parts(
@@ -250,8 +294,8 @@ pub(crate) mod tests {
         ]
     }
 
-    fn make_interp() -> Interpolator {
-        Interpolator::try_new(TEMPLATE, Some(":")).unwrap()
+    fn make_interp() -> TemplateChunkKeyEncoding {
+        TemplateChunkKeyEncoding::try_new(TEMPLATE, Some(":")).unwrap()
     }
 
     #[test]

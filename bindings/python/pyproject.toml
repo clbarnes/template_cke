@@ -35,3 +35,4 @@ build-backend = "maturin"
 python-source = "python"
 exclude = ["**/__pycache__", "**/*.pyc", "**/*.pyo"]
 module-name = "template_cke._template_cke_py"
+bindings = "pyo3"

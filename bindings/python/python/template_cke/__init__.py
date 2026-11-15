@@ -31,7 +31,7 @@ class TemplateChunkKeyEncoding(ChunkKeyEncoding):
             config_parsed["template"] = config_parsed.pop("format")
         fmt = config_parsed["template"]
         if not isinstance(fmt, str):
-            raise ValueError("template must be a string")
+            raise TypeError("template must be a string")
         separator = config_parsed.get("separator")
         if separator is not None and not isinstance(separator, str):
             raise ValueError("separator must be a string if given")

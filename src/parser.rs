@@ -3,22 +3,22 @@ use crate::errors::ParseError;
 use std::iter::Peekable;
 use std::str::Chars;
 
-struct FormatParser<'a> {
+struct TemplateParser<'a> {
     parts: Vec<Part>,
     in_brace: bool,
     buf: String,
-    format: &'a str,
+    template: &'a str,
     chars: Peekable<Chars<'a>>,
 }
 
-impl<'a> FormatParser<'a> {
-    fn new(format: &'a str) -> Self {
+impl<'a> TemplateParser<'a> {
+    fn new(template: &'a str) -> Self {
         Self {
             parts: Vec::new(),
             in_brace: false,
-            buf: String::with_capacity(format.len()),
-            format,
-            chars: format.chars().peekable(),
+            buf: String::with_capacity(template.len()),
+            template,
+            chars: template.chars().peekable(),
         }
     }
 
@@ -42,13 +42,13 @@ impl<'a> FormatParser<'a> {
                     self.chars.next();
                     continue;
                 }
-                return Err(ParseError::UnmatchedBrace(self.format.to_string()));
+                return Err(ParseError::UnmatchedBrace(self.template.to_string()));
             } else {
                 self.buf.push(c);
             }
         }
         if self.in_brace {
-            Err(ParseError::UnmatchedBrace(self.format.to_string()))
+            Err(ParseError::UnmatchedBrace(self.template.to_string()))
         } else if self.buf.is_empty() {
             Ok(None)
         } else {
@@ -63,8 +63,8 @@ impl<'a> FormatParser<'a> {
     }
 }
 
-pub fn parse_parts(format: &str) -> Result<Vec<Part>, ParseError> {
-    let mut parser = FormatParser::new(format);
+pub fn parse_parts(template: &str) -> Result<Vec<Part>, ParseError> {
+    let mut parser = TemplateParser::new(template);
     while let Some(part) = parser.take_part()? {
         parser.parts.push(part);
     }
@@ -74,11 +74,11 @@ pub fn parse_parts(format: &str) -> Result<Vec<Part>, ParseError> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::tests::{FORMAT, expected};
+    use crate::tests::{TEMPLATE, expected};
 
     #[test]
     fn can_parse_parts() {
-        let res = parse_parts(FORMAT).unwrap();
+        let res = parse_parts(TEMPLATE).unwrap();
         assert_eq!(res, expected());
     }
 }

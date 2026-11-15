@@ -1,25 +1,25 @@
 use criterion::{Criterion, criterion_group, criterion_main};
 use std::hint::black_box;
-use template_cke::Interpolator;
+use template_cke::TemplateChunkKeyEncoding;
 
-const FORMAT: &str = "potato{0}-{2}/${4:03}_{*},{-1}suffix";
+const TEMPLATE: &str = "potato{0}-{2}/${4:03}_{*},{-1}suffix";
 const CHUNK_IDX: &[u64] = &[0, 1, 2, 3, 4, 5, 6];
 
 fn bench_build(c: &mut Criterion) {
     c.bench_function("build", |b| {
-        b.iter(|| Interpolator::try_new(black_box(FORMAT), Some(":")))
+        b.iter(|| TemplateChunkKeyEncoding::try_new(black_box(TEMPLATE), Some(":")))
     });
 }
 
 fn bench_interpolate(c: &mut Criterion) {
-    let interp = Interpolator::try_new(FORMAT, Some(":")).unwrap();
+    let interp = TemplateChunkKeyEncoding::try_new(TEMPLATE, Some(":")).unwrap();
     c.bench_function("interpolate", |b| {
         b.iter(|| interp.interpolate(black_box(CHUNK_IDX)))
     });
 }
 
 fn bench_interpolate_into(c: &mut Criterion) {
-    let interp = Interpolator::try_new(FORMAT, Some(":")).unwrap();
+    let interp = TemplateChunkKeyEncoding::try_new(TEMPLATE, Some(":")).unwrap();
     let mut out = String::with_capacity(interp.buf_len(CHUNK_IDX));
     c.bench_function("interpolate_into", |b| {
         b.iter(|| {

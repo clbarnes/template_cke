@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from typing import Self, ClassVar, Literal
+from typing import ClassVar, Literal, Self
 
 from zarr.core.chunk_key_encodings import ChunkKeyEncoding
 from zarr.core.common import JSON, parse_named_configuration
@@ -14,12 +14,12 @@ __all__ = ["TemplateChunkKeyEncoding"]
 class TemplateChunkKeyEncoding(ChunkKeyEncoding):
     name: ClassVar[Literal["template"]] = "template"
 
-    format: str
+    template: str
     separator: str | None = None
     _interpolator: PyInterpolator = field(init=False)
 
     def __post_init__(self):
-        interp = PyInterpolator(self.format, self.separator)
+        interp = PyInterpolator(self.template, self.separator)
         object.__setattr__(self, "_interpolator", interp)
 
     @classmethod
@@ -27,16 +27,18 @@ class TemplateChunkKeyEncoding(ChunkKeyEncoding):
         _, config_parsed = parse_named_configuration(data, require_configuration=False)
         if config_parsed is None:
             raise ValueError("Config must exist")
-        fmt = config_parsed["format"]
+        if "template" not in config_parsed and "format" in config_parsed:
+            config_parsed["template"] = config_parsed.pop("format")
+        fmt = config_parsed["template"]
         if not isinstance(fmt, str):
-            raise ValueError("format must be a string")
+            raise TypeError("template must be a string")
         separator = config_parsed.get("separator")
         if separator is not None and not isinstance(separator, str):
             raise ValueError("separator must be a string if given")
         return cls(fmt, separator)
 
     def to_dict(self) -> dict[str, JSON]:
-        c = {"format": self.format}
+        c = {"template": self.template}
         if self.separator is not None:
             c["separator"] = self.separator
         return {"name": self.name, "configuration": c}

@@ -1,6 +1,6 @@
 use std::str::FromStr;
 use std::sync::LazyLock;
-use template_cke::Interpolator;
+use template_cke::TemplateChunkKeyEncoding;
 
 pub const TSV_TEXT: &str = include_str!("../fixtures/examples.tsv");
 
@@ -14,8 +14,9 @@ pub struct TestCase {
 }
 
 impl TestCase {
-    pub fn interpolator(&self) -> Result<Interpolator, String> {
-        Interpolator::try_new(&self.template, Some(&self.separator)).map_err(|e| e.to_string())
+    pub fn interpolator(&self) -> Result<TemplateChunkKeyEncoding, String> {
+        TemplateChunkKeyEncoding::try_new(&self.template, Some(&self.separator))
+            .map_err(|e| e.to_string())
     }
 
     pub fn run(&self) -> Result<(), String> {

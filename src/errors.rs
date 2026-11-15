@@ -1,11 +1,11 @@
 use thiserror::Error;
 
-/// Errors produced while parsing a format string and constructing an
-/// [`Interpolator`](crate::Interpolator).
+/// Errors produced while parsing a template string and constructing an
+/// [`TemplateChunkKeyEncoding`](crate::TemplateChunkKeyEncoding).
 #[derive(Debug, Clone, PartialEq, Eq, Error)]
 pub enum ParseError {
-    /// A brace was unmatched in the format string (an unescaped `{` or `}`).
-    #[error("Unmatched brace in format string: {0}")]
+    /// A brace was unmatched in the template string (an unescaped `{` or `}`).
+    #[error("Unmatched brace in template string: {0}")]
     UnmatchedBrace(String),
     /// The pad specifier after `:` was not a valid padding number.
     #[error("Invalid number format: {0}")]
@@ -19,12 +19,12 @@ pub enum ParseError {
     /// A catch-all placeholder (`{*}`) was used without supplying a separator.
     #[error("Catch-all part requires a separator")]
     CatchAllNeedsSeparator,
-    /// More than one catch-all placeholder (`{*}`) appeared in the format.
+    /// More than one catch-all placeholder (`{*}`) appeared in the template.
     #[error("Cannot have multiple catch-all parts")]
     MultipleCatchAll,
 }
 
-/// Errors produced while interpolating chunk indices into a format string.
+/// Errors produced while interpolating chunk indices into a template string.
 #[derive(Debug, Clone, PartialEq, Eq, Error)]
 pub enum InterpolateError {
     /// A referenced index was out of bounds for the given chunk indices.

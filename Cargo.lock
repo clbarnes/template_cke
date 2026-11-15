@@ -728,6 +728,7 @@ version = "0.1.0"
 dependencies = [
  "criterion",
  "inventory",
+ "monostate",
  "serde",
  "serde_json",
  "thiserror",
@@ -742,6 +743,7 @@ name = "template_cke_py"
 version = "0.1.0"
 dependencies = [
  "pyo3",
+ "serde",
  "template_cke",
 ]
 

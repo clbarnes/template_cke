@@ -3,7 +3,8 @@
 #
 #    maturin generate-ci github
 #
-# and then add `defaults.run.working-directory: bindings/python`
+# and then add `working-directory: bindings/python` to each maturin-action step
+# and prefix upload-artifact paths with `bindings/python/`
 name: Maturin CI
 
 on:
@@ -15,10 +16,6 @@ on:
       - "*"
   pull_request:
   workflow_dispatch:
-
-defaults:
-  run:
-    working-directory: bindings/python
 
 permissions:
   contents: read
@@ -53,11 +50,12 @@ jobs:
           args: --release --out dist --find-interpreter
           sccache: ${{ !startsWith(github.ref, 'refs/tags/') }}
           manylinux: auto
+          working-directory: bindings/python
       - name: Upload wheels
         uses: actions/upload-artifact@v6
         with:
           name: wheels-linux-${{ matrix.platform.target }}
-          path: dist
+          path: bindings/python/dist
 
   musllinux:
     runs-on: ${{ matrix.platform.runner }}
@@ -84,11 +82,12 @@ jobs:
           args: --release --out dist --find-interpreter
           sccache: ${{ !startsWith(github.ref, 'refs/tags/') }}
           manylinux: musllinux_1_2
+          working-directory: bindings/python
       - name: Upload wheels
         uses: actions/upload-artifact@v6
         with:
           name: wheels-musllinux-${{ matrix.platform.target }}
-          path: dist
+          path: bindings/python/dist
 
   windows:
     runs-on: ${{ matrix.platform.runner }}
@@ -116,11 +115,12 @@ jobs:
           target: ${{ matrix.platform.target }}
           args: --release --out dist --find-interpreter
           sccache: ${{ !startsWith(github.ref, 'refs/tags/') }}
+          working-directory: bindings/python
       - name: Upload wheels
         uses: actions/upload-artifact@v6
         with:
           name: wheels-windows-${{ matrix.platform.target }}
-          path: dist
+          path: bindings/python/dist
 
   macos:
     runs-on: ${{ matrix.platform.runner }}
@@ -142,11 +142,12 @@ jobs:
           target: ${{ matrix.platform.target }}
           args: --release --out dist --find-interpreter
           sccache: ${{ !startsWith(github.ref, 'refs/tags/') }}
+          working-directory: bindings/python
       - name: Upload wheels
         uses: actions/upload-artifact@v6
         with:
           name: wheels-macos-${{ matrix.platform.target }}
-          path: dist
+          path: bindings/python/dist
 
   sdist:
     runs-on: ubuntu-latest
@@ -157,11 +158,12 @@ jobs:
         with:
           command: sdist
           args: --out dist
+          working-directory: bindings/python
       - name: Upload sdist
         uses: actions/upload-artifact@v6
         with:
           name: wheels-sdist
-          path: dist
+          path: bindings/python/dist
 
   release:
     name: Release

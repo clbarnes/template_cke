@@ -31,9 +31,10 @@ name = "parse"
 harness = false
 
 [features]
-default = ["zarrs"]
+default = ["serde", "zarrs"]
+serde = ["dep:serde"]
 zarrs = [
-    "dep:serde",
+    "serde",
     "dep:zarrs_chunk_key_encoding",
     "dep:zarrs_metadata",
     "dep:zarrs_plugin",

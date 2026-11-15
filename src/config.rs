@@ -1,7 +1,8 @@
-#[derive(Debug, Clone, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[serde(deny_unknown_fields)]
 pub struct TemplateChunkKeyEncodingConfiguration {
-    #[serde(alias = "format")]
+    #[cfg_attr(feature = "serde", serde(alias = "format"))]
     template: String,
     separator: Option<String>,
 }

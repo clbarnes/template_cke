@@ -742,6 +742,7 @@ name = "template_cke_py"
 version = "0.1.0"
 dependencies = [
  "pyo3",
+ "serde",
  "template_cke",
 ]
 

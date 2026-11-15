@@ -4,6 +4,7 @@ use std::str::FromStr;
 
 use crate::errors::{InterpolateError, ParseError};
 use crate::parser::parse_parts;
+pub mod config;
 pub mod errors;
 pub mod parser;
 
@@ -90,8 +91,8 @@ pub struct Interpolator {
 }
 
 impl Interpolator {
-    pub fn try_new(fmt: &str, sep: Option<impl Into<String>>) -> Result<Self, ParseError> {
-        let parts = parse_parts(fmt)?;
+    pub fn try_new(template: &str, sep: Option<impl Into<String>>) -> Result<Self, ParseError> {
+        let parts = parse_parts(template)?;
         Self::from_parts(parts, sep)
     }
 
@@ -231,7 +232,7 @@ impl Interpolator {
 #[cfg(test)]
 pub(crate) mod tests {
     use super::*;
-    pub const FORMAT: &str = "potato{0}-{2}/{4:03}_{*},{-1}suffix";
+    pub const TEMPLATE: &str = "potato{0}-{2}/{4:03}_{*},{-1}suffix";
 
     pub fn expected() -> Vec<Part> {
         vec![
@@ -250,7 +251,7 @@ pub(crate) mod tests {
     }
 
     fn make_interp() -> Interpolator {
-        Interpolator::try_new(FORMAT, Some(":")).unwrap()
+        Interpolator::try_new(TEMPLATE, Some(":")).unwrap()
     }
 
     #[test]

@@ -4,6 +4,7 @@ use zarrs_metadata::{Configuration, ConfigurationSerialize};
 use zarrs_plugin::{PluginConfigurationInvalidError, PluginCreateError};
 use zarrs_storage::StoreKey;
 
+use crate::config::{TemplateChunkKeyEncoding, TemplateChunkKeyEncodingConfiguration};
 use crate::errors::ParseError;
 
 zarrs_plugin::impl_extension_aliases!(TemplateChunkKeyEncoding, v3: "template", ["zarrs:template"]);
@@ -13,69 +14,7 @@ inventory::submit! {
     ChunkKeyEncodingPlugin::new::<TemplateChunkKeyEncoding>()
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
-#[serde(deny_unknown_fields)]
-pub struct TemplateChunkKeyEncodingConfiguration {
-    format: String,
-    separator: Option<String>,
-}
-
 impl ConfigurationSerialize for TemplateChunkKeyEncodingConfiguration {}
-
-#[derive(Debug, Clone)]
-pub struct TemplateChunkKeyEncoding {
-    format: String,
-    interpolator: crate::Interpolator,
-}
-
-impl TemplateChunkKeyEncoding {
-    pub fn try_new(
-        format: impl Into<String>,
-        separator: Option<impl Into<String>>,
-    ) -> Result<Self, crate::errors::ParseError> {
-        let format = format.into();
-        let interpolator = crate::Interpolator::try_new(&format, separator.map(|s| s.into()))?;
-        Ok(Self {
-            format,
-            interpolator,
-        })
-    }
-}
-
-impl TryFrom<TemplateChunkKeyEncodingConfiguration> for TemplateChunkKeyEncoding {
-    type Error = crate::errors::ParseError;
-
-    fn try_from(config: TemplateChunkKeyEncodingConfiguration) -> Result<Self, Self::Error> {
-        Self::try_new(config.format, config.separator)
-    }
-}
-
-impl From<TemplateChunkKeyEncoding> for TemplateChunkKeyEncodingConfiguration {
-    fn from(value: TemplateChunkKeyEncoding) -> Self {
-        let separator = value
-            .interpolator
-            .has_catchall()
-            .then(|| value.interpolator.sep.clone());
-        Self {
-            format: value.format,
-            separator,
-        }
-    }
-}
-
-impl From<&TemplateChunkKeyEncoding> for TemplateChunkKeyEncodingConfiguration {
-    fn from(value: &TemplateChunkKeyEncoding) -> Self {
-        let separator = value
-            .interpolator
-            .has_catchall()
-            .then(|| value.interpolator.sep.clone());
-        Self {
-            format: value.format.clone(),
-
-            separator,
-        }
-    }
-}
 
 impl ChunkKeyEncodingTraits for TemplateChunkKeyEncoding {
     fn create(metadata: &MetadataV3) -> Result<ChunkKeyEncoding, PluginCreateError>
@@ -115,14 +54,31 @@ mod tests {
     use zarrs_plugin::ExtensionName;
 
     use super::*;
-    use crate::tests::FORMAT;
+    use crate::tests::TEMPLATE;
 
     #[test]
     fn can_deser() {
         let json = serde_json::json!({
             "name": "template",
             "configuration": {
-                "format": FORMAT,
+                "template": TEMPLATE,
+                "separator": ":"
+            }
+        });
+        let meta = MetadataV3::deserialize(json).expect("failed to deserialize metadata");
+        let config: TemplateChunkKeyEncodingConfiguration = meta
+            .to_typed_configuration()
+            .expect("failed to deserialize typed configuration");
+        let _encoding =
+            TemplateChunkKeyEncoding::try_from(config).expect("failed to create encoder");
+    }
+
+    #[test]
+    fn can_deser_alias() {
+        let json = serde_json::json!({
+            "name": "template",
+            "configuration": {
+                "format": TEMPLATE,
                 "separator": ":"
             }
         });
@@ -136,8 +92,8 @@ mod tests {
 
     #[test]
     fn can_ser() {
-        let encoding =
-            TemplateChunkKeyEncoding::try_new(FORMAT, Some(":")).expect("failed to create encoder");
+        let encoding = TemplateChunkKeyEncoding::try_new(TEMPLATE, Some(":"))
+            .expect("failed to create encoder");
         let config: TemplateChunkKeyEncodingConfiguration = (&encoding).into();
         let meta = MetadataV3::new_with_serializable_configuration(
             encoding
@@ -152,7 +108,7 @@ mod tests {
             {
                 "name": "template",
                 "configuration": {
-                    "format": FORMAT,
+                    "template": TEMPLATE,
                     "separator": ":"
                 }
             }
